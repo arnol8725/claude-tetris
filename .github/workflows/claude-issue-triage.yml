@@ -1,0 +1,42 @@
+name: Claude Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+concurrency:
+  group: issue-triage-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  triage:
+    # Skip issues already directed at @claude — claude.yml handles those, and
+    # running both on the same event would duplicate the analysis.
+    if: |
+      !contains(github.event.issue.title, '@claude') &&
+      !contains(github.event.issue.body, '@claude')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code triage
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: '/triage-issue REPO: ${{ github.repository }} ISSUE_NUMBER: ${{ github.event.issue.number }}'
+          claude_args: '--allowed-tools "Read,Grep,Glob,Bash(gh issue view:*),Bash(./scripts/triage-issue.sh:*)"'
+          # Deliberately NOT setting `allowed_non_write_users` here. That
+          # input enables claude-code-action's bwrap subprocess sandbox,
+          # which has an open upstream regression that fails every Bash
+          # call with "bwrap: Can't create file at /home/.mcp.json:
+          # Permission denied" while the job still reports success:
+          # https://github.com/anthropics/claude-code-action/issues/1547
+          # Trade-off: triage only runs for issues filed by collaborators
+          # with write access to this repo.
