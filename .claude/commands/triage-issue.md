@@ -29,7 +29,7 @@ The caller passes `REPO:` and `ISSUE_NUMBER:` in `$ARGUMENTS`. Parse them from t
    - `area:ui` → `index.html`, `style.css`, overlay elements
    - `area:docs` / `area:ci` → `README.md`, `.github/workflows`
 
-4. **Write the diagnosis in Spanish** (the whole project — README, UI copy, issues — is in Spanish). Structure:
+4. **Write the diagnosis in Spanish** (the whole project — README, UI copy, issues — is in Spanish), formatted as **GitHub-flavored Markdown** — it's posted as an issue comment and must render correctly (headings with `##`, `**bold**`, `` `inline code` `` for identifiers, fenced code blocks for snippets, `-` for lists). No raw/plain text. Structure:
    - **Síntoma**: one line restating the problem
    - **Ubicación**: file + line + function
    - **Causa probable**: grounded in the code you actually read, not speculation
