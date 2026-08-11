@@ -13,7 +13,10 @@ const COLORS = [
   '#e57373', // Z - red
   '#90caf9', // J - pale blue
   '#ffb74d', // L - orange
+  '#9e9e9e', // Nut - metallic gray
 ];
+
+const HOLE = 9; // celda metálica con hueco circular dibujado (pieza tuerca)
 
 const PIECES = [
   null,
@@ -24,6 +27,7 @@ const PIECES = [
   [[5,5,0],[0,5,5],[0,0,0]],                  // Z
   [[6,0,0],[6,6,6],[0,0,0]],                  // J
   [[0,0,7],[7,7,7],[0,0,0]],                  // L
+  [[8,8,8],[8,HOLE,8],[8,8,8]],               // Nut (tuerca)
 ];
 
 const LINE_SCORES = [0, 100, 300, 500, 800];
@@ -68,7 +72,7 @@ function createBoard() {
 }
 
 function randomPiece() {
-  const type = Math.floor(Math.random() * 7) + 1;
+  const type = Math.floor(Math.random() * 8) + 1;
   const shape = PIECES[type].map(row => [...row]);
   return { type, shape, x: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2), y: 0 };
 }
@@ -179,13 +183,21 @@ function updateHUD() {
 
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
-  const color = COLORS[colorIndex];
+  const isHole = colorIndex === HOLE;
+  const color = isHole ? COLORS[8] : COLORS[colorIndex];
   context.globalAlpha = alpha ?? 1;
   context.fillStyle = color;
   context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
   // highlight
   context.fillStyle = 'rgba(255,255,255,0.12)';
   context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+  // hueco circular de la tuerca
+  if (isHole) {
+    context.fillStyle = 'rgba(0,0,0,0.55)';
+    context.beginPath();
+    context.arc(x * size + size / 2, y * size + size / 2, size * 0.28, 0, Math.PI * 2);
+    context.fill();
+  }
   context.globalAlpha = 1;
 }
 
